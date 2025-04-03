@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, Inject } from '@nestjs/common';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import * as bcrypt from 'bcrypt';
@@ -6,7 +6,10 @@ import { IAuthRepository } from './interfaces/auth.repository.interface';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly authRepository: IAuthRepository) {}
+  constructor(
+    @Inject('IAuthRepository')
+    private readonly authRepository: IAuthRepository,
+  ) {}
 
   async login(loginDto: LoginDto) {
     const user = await this.authRepository.findByEmail(loginDto.email);

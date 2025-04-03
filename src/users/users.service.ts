@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-
+import { PrismaService } from '../prisma/prisma.service';
 interface User {
   id: string;
   email: string;
@@ -11,35 +11,13 @@ interface User {
 
 @Injectable()
 export class UsersService {
-  private users: User[] = [];
+  constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(): Promise<User[]> {
-    return this.users;
+  async findAll() {
+    return this.prisma.user.findMany();
   }
 
-  async findOne(id: string): Promise<User | undefined> {
-    return this.users.find((user) => user.id === id);
-  }
-
-  async update(
-    id: string,
-    updateUserDto: { name: string; email: string },
-  ): Promise<User | null> {
-    const userIndex = this.users.findIndex((user) => user.id === id);
-    if (userIndex > -1) {
-      this.users[userIndex] = { ...this.users[userIndex], ...updateUserDto };
-      return this.users[userIndex];
-    }
-    return null;
-  }
-
-  async remove(id: string): Promise<User | null> {
-    const userIndex = this.users.findIndex((user) => user.id === id);
-    if (userIndex > -1) {
-      const removedUser = this.users[userIndex];
-      this.users.splice(userIndex, 1);
-      return removedUser;
-    }
-    return null;
+  async findOne(id: string) {
+    return this.prisma.user.findUnique({ where: { id } });
   }
 }

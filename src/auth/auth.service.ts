@@ -1,26 +1,56 @@
-import { Injectable } from '@nestjs/common';
-import { LoginDto, RegisterDto, AuthResponse } from './auth.types';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
+import { AuthRepository } from './repositories/auth.repository';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
-  async login(loginDto: LoginDto): Promise<AuthResponse> {
-    console.log('??');
-    // TODO: 실제 로그인 로직 구현
+  constructor(private readonly authRepository: AuthRepository) {}
+
+  async login(loginDto: LoginDto) {
+    const user = await this.authRepository.findByEmail(loginDto.email);
+
+    if (!user) {
+      throw new UnauthorizedException(
+        '이메일 또는 비밀번호가 일치하지 않습니다',
+      );
+    }
+
+    const isPasswordValid = await bcrypt.compare(
+      loginDto.password,
+      user.password,
+    );
+    if (!isPasswordValid) {
+      throw new UnauthorizedException(
+        '이메일 또는 비밀번호가 일치하지 않습니다',
+      );
+    }
+
     return {
       message: '로그인 성공',
       user: {
-        email: loginDto.email,
+        email: user.email,
+        name: user.name,
       },
     };
   }
 
-  async register(registerDto: RegisterDto): Promise<AuthResponse> {
-    // TODO: 실제 회원가입 로직 구현
+  async register(registerDto: RegisterDto) {
+    const existingUser = await this.authRepository.findByEmail(
+      registerDto.email,
+    );
+    if (existingUser) {
+      throw new UnauthorizedException('이미 존재하는 이메일입니다');
+    }
+
+    const user = await this.authRepository.createUser(registerDto);
+
     return {
       message: '회원가입 성공',
       user: {
-        email: registerDto.email,
-        name: registerDto.name,
+        email: user.email,
+        name: user.name,
       },
     };
   }

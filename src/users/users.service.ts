@@ -1,17 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { UsersRepository } from './repositories/users.repository';
-interface User {
-  id: string;
-  email: string;
-  name: string;
-  password: string;
-  createdAt: Date;
-  updatedAt: Date;
-}
+import { IUsersRepository } from './interfaces/users.repository.interface';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly usersRepository: UsersRepository) {}
+  constructor(private readonly usersRepository: IUsersRepository) {}
 
   async findAll() {
     return this.usersRepository.findAll();

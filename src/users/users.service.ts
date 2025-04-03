@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { UsersRepository } from './repositories/users.repository';
 interface User {
   id: string;
   email: string;
@@ -11,13 +11,13 @@ interface User {
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly usersRepository: UsersRepository) {}
 
   async findAll() {
-    return this.prisma.user.findMany();
+    return this.usersRepository.findAll();
   }
 
   async findOne(id: string) {
-    return this.prisma.user.findUnique({ where: { id } });
+    return this.usersRepository.findOne(id);
   }
 }
